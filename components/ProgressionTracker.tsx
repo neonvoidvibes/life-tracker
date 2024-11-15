@@ -14,7 +14,7 @@ interface Stage {
   id: string;
   name: string;
   status: Status;
-  type?: "paper";
+  type?: "outcome";
 }
 
 interface Stages {
@@ -31,8 +31,18 @@ const INITIAL_STAGES: Stages = {
     { id: "iosapp", name: "iOS App co-built by AI", status: "doing" },
   ],
   P_OUTCOMES: [
-    { id: "agency", name: "High-level Agency", status: "pending" },
-    { id: "financial", name: "Financial Security", status: "pending" },
+    {
+      id: "agency",
+      name: "High-level Agency",
+      status: "pending",
+      type: "outcome",
+    },
+    {
+      id: "financial",
+      name: "Financial Security",
+      status: "pending",
+      type: "outcome",
+    },
   ],
   PROJECT: [
     {
@@ -41,7 +51,7 @@ const INITIAL_STAGES: Stages = {
       status: "pending",
     },
     { id: "labs", name: "Continuous Labs/Events", status: "pending" },
-    { id: "memo", name: "Memo Paper", status: "pending", type: "paper" },
+    { id: "memo", name: "Memo Paper", status: "pending", type: "outcome" },
     {
       id: "conference",
       name: "Wisdom & AI Conference Stockholm",
@@ -51,7 +61,7 @@ const INITIAL_STAGES: Stages = {
       id: "presentation",
       name: "Presentation Paper",
       status: "pending",
-      type: "paper",
+      type: "outcome",
     },
     {
       id: "partners",
@@ -59,26 +69,35 @@ const INITIAL_STAGES: Stages = {
       status: "pending",
     },
     {
+      id: "tokenpaper",
+      name: "Token Paper",
+      status: "pending",
+    },
+    {
       id: "blueprint",
       name: "Blueprint Paper: Prediction is all you need",
       status: "pending",
-      type: "paper",
     },
     { id: "funding", name: "Project Funding", status: "pending" },
   ],
   NEAR_OUTCOMES: [
-    { id: "community", name: "Community Building", status: "pending" },
-    { id: "os", name: "Open Source AI-augmented OS", status: "pending" },
     {
-      id: "tokenpaper",
-      name: "Token Paper",
+      id: "community",
+      name: "Community Building",
       status: "pending",
-      type: "paper",
+      type: "outcome",
+    },
+    {
+      id: "os",
+      name: "Open Source AI-augmented OS",
+      status: "pending",
+      type: "outcome",
     },
     {
       id: "token",
       name: "River Funding via $RIVR Token",
       status: "pending",
+      type: "outcome",
     },
   ],
   LONG_OUTCOMES: [
@@ -109,15 +128,17 @@ const ProgressionTracker: FC = () => {
     if (typeof window !== "undefined") {
       const VERSION = "0.2";
       const savedVersion = localStorage.getItem("progressionVersion");
-
-      if (savedVersion !== VERSION) {
-        localStorage.removeItem("progressionStages");
-        localStorage.setItem("progressionVersion", VERSION);
-      }
-
       const savedStages = localStorage.getItem("progressionStages");
       if (savedStages) {
-        setStages(JSON.parse(savedStages));
+        try {
+          const parsedStages = JSON.parse(savedStages);
+          // Simply use the parsed stages directly to maintain order
+          setStages(parsedStages);
+          localStorage.setItem("progressionVersion", VERSION);
+        } catch (e) {
+          console.error("Error parsing saved stages:", e);
+          setStages(INITIAL_STAGES);
+        }
       }
     }
   }, []);
@@ -146,6 +167,12 @@ const ProgressionTracker: FC = () => {
   useEffect(() => {
     console.log("Stages updated:", stages);
   }, [stages]);
+
+  const getItemBackgroundColor = (type?: string): string => {
+    return type === "outcome"
+      ? "bg-purple-50 dark:bg-purple-900/10 hover:bg-purple-100/50 dark:hover:bg-purple-900/20"
+      : "bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600";
+  };
 
   const getNextStatus = (status: Status): Status => {
     const sequence: Status[] = [
@@ -195,7 +222,7 @@ const ProgressionTracker: FC = () => {
         {items.map((item) => (
           <div
             key={item.id}
-            className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 transform hover:scale-[1.01]"
+            className={`p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 transform hover:scale-[1.01] ${getItemBackgroundColor(item.type)}`}
           >
             <div className="flex items-center justify-between">
               <span className="font-medium">{item.name}</span>

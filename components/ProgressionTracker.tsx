@@ -2,8 +2,13 @@
 
 import { FC, useState, useEffect } from "react";
 
-type Status = "not_started" | "prioritized" | "doing" | "paused" | "completed";
-type Section = "PERSONAL" | "PROJECT" | "OUTCOMES";
+type Status = "pending" | "prioritized" | "doing" | "paused" | "completed";
+type Section =
+  | "PERSONAL"
+  | "PROJECT"
+  | "P_OUTCOMES"
+  | "NEAR_OUTCOMES"
+  | "LONG_OUTCOMES";
 
 interface Stage {
   id: string;
@@ -14,68 +19,74 @@ interface Stage {
 
 interface Stages {
   PERSONAL: Stage[];
+  P_OUTCOMES: Stage[];
   PROJECT: Stage[];
-  OUTCOMES: Stage[];
+  NEAR_OUTCOMES: Stage[];
+  LONG_OUTCOMES: Stage[];
 }
 
 const INITIAL_STAGES: Stages = {
   PERSONAL: [
     { id: "aiea", name: "AI/EA Progress Tracking App", status: "doing" },
     { id: "iosapp", name: "iOS App co-built by AI", status: "doing" },
-    { id: "agency", name: "High-level Agency", status: "not_started" },
-    { id: "financial", name: "Financial Security", status: "not_started" },
+  ],
+  P_OUTCOMES: [
+    { id: "agency", name: "High-level Agency", status: "pending" },
+    { id: "financial", name: "Financial Security", status: "pending" },
   ],
   PROJECT: [
     {
       id: "infra",
       name: "Basic Infrastructure (AI-OS Demo)",
-      status: "not_started",
+      status: "pending",
     },
-    { id: "labs", name: "Continuous Labs/Events", status: "not_started" },
-    { id: "memo", name: "Memo Paper", status: "not_started", type: "paper" },
+    { id: "labs", name: "Continuous Labs/Events", status: "pending" },
+    { id: "memo", name: "Memo Paper", status: "pending", type: "paper" },
     {
       id: "conference",
       name: "Wisdom & AI Conference Stockholm",
-      status: "not_started",
+      status: "pending",
     },
     {
       id: "presentation",
       name: "Presentation Paper",
-      status: "not_started",
+      status: "pending",
       type: "paper",
     },
     {
       id: "partners",
       name: "Business Partners Alignment",
-      status: "not_started",
+      status: "pending",
     },
     {
       id: "blueprint",
       name: "Blueprint Paper: Prediction is all you need",
-      status: "not_started",
+      status: "pending",
       type: "paper",
     },
-    { id: "funding", name: "Project Funding", status: "not_started" },
-    { id: "community", name: "Community Building", status: "not_started" },
-    { id: "os", name: "Open Source AI-augmented OS", status: "not_started" },
+    { id: "funding", name: "Project Funding", status: "pending" },
+  ],
+  NEAR_OUTCOMES: [
+    { id: "community", name: "Community Building", status: "pending" },
+    { id: "os", name: "Open Source AI-augmented OS", status: "pending" },
     {
       id: "tokenpaper",
       name: "Token Paper",
-      status: "not_started",
+      status: "pending",
       type: "paper",
     },
     {
       id: "token",
       name: "River Funding via $RIVR Token",
-      status: "not_started",
+      status: "pending",
     },
   ],
-  OUTCOMES: [
-    { id: "school", name: "Neo in Regenerative School", status: "not_started" },
+  LONG_OUTCOMES: [
+    { id: "school", name: "Neo in Regenerative School", status: "pending" },
     {
       id: "village",
       name: "Family in Regenerative Village",
-      status: "not_started",
+      status: "pending",
     },
   ],
 };
@@ -84,9 +95,19 @@ const ProgressionTracker: FC = () => {
   const [stages, setStages] = useState<Stages>(INITIAL_STAGES);
 
   useEffect(() => {
-    const savedStages = localStorage.getItem("progressionStages");
-    if (savedStages) {
-      setStages(JSON.parse(savedStages));
+    if (typeof window !== "undefined") {
+      const VERSION = "0.2";
+      const savedVersion = localStorage.getItem("progressionVersion");
+
+      if (savedVersion !== VERSION) {
+        localStorage.removeItem("progressionStages");
+        localStorage.setItem("progressionVersion", VERSION);
+      }
+
+      const savedStages = localStorage.getItem("progressionStages");
+      if (savedStages) {
+        setStages(JSON.parse(savedStages));
+      }
     }
   }, []);
 
@@ -96,7 +117,7 @@ const ProgressionTracker: FC = () => {
 
   const getStatusColor = (status: Status): string => {
     switch (status) {
-      case "not_started":
+      case "pending":
         return "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700";
       case "prioritized":
         return "bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200";
@@ -113,7 +134,7 @@ const ProgressionTracker: FC = () => {
 
   const getNextStatus = (status: Status): Status => {
     const sequence: Status[] = [
-      "not_started",
+      "pending",
       "prioritized",
       "doing",
       "paused",
@@ -176,7 +197,7 @@ const ProgressionTracker: FC = () => {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Future Progression Tracker</h1>
+        <h1 className="text-2xl font-bold">Life Tracker</h1>
         <button
           onClick={resetProgress}
           className="px-4 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -185,8 +206,10 @@ const ProgressionTracker: FC = () => {
         </button>
       </div>
       {renderSection("Personal", stages.PERSONAL)}
+      {renderSection("Personal Outcomes", stages.P_OUTCOMES)}
       {renderSection("Project", stages.PROJECT)}
-      {renderSection("Outcomes", stages.OUTCOMES)}
+      {renderSection("Near Outcomes", stages.NEAR_OUTCOMES)}
+      {renderSection("Long-Term Outcomes", stages.LONG_OUTCOMES)}
     </div>
   );
 };

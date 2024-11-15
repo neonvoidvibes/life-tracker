@@ -51,17 +51,17 @@ const INITIAL_STAGES: Stages = {
       status: "pending",
     },
     { id: "labs", name: "Continuous Labs/Events", status: "pending" },
-    { id: "memo", name: "Memo Paper", status: "pending", type: "outcome" },
+    { id: "memo", name: "Memo Paper", status: "pending" },
     {
       id: "conference",
       name: "Wisdom & AI Conference Stockholm",
       status: "pending",
     },
+    { id: "funding", name: "Project Funding", status: "pending" },
     {
       id: "presentation",
       name: "Presentation Paper",
       status: "pending",
-      type: "outcome",
     },
     {
       id: "partners",
@@ -78,7 +78,6 @@ const INITIAL_STAGES: Stages = {
       name: "Blueprint Paper: Prediction is all you need",
       status: "pending",
     },
-    { id: "funding", name: "Project Funding", status: "pending" },
   ],
   NEAR_OUTCOMES: [
     {
@@ -101,11 +100,17 @@ const INITIAL_STAGES: Stages = {
     },
   ],
   LONG_OUTCOMES: [
-    { id: "school", name: "Neo in Regenerative School", status: "pending" },
+    {
+      id: "school",
+      name: "Neo in Regenerative School",
+      status: "pending",
+      type: "outcome",
+    },
     {
       id: "village",
       name: "Family in Regenerative Village",
       status: "pending",
+      type: "outcome",
     },
   ],
 };

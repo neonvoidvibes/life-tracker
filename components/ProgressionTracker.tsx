@@ -94,6 +94,17 @@ const INITIAL_STAGES: Stages = {
 const ProgressionTracker: FC = () => {
   const [stages, setStages] = useState<Stages>(INITIAL_STAGES);
 
+  const getTitleKey = (title: string): Section => {
+    const mapping: Record<string, Section> = {
+      "Personal Outcomes": "P_OUTCOMES",
+      Personal: "PERSONAL",
+      Project: "PROJECT",
+      "Near Outcomes": "NEAR_OUTCOMES",
+      "Long-Term Outcomes": "LONG_OUTCOMES",
+    };
+    return mapping[title];
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const VERSION = "0.2";
@@ -132,6 +143,10 @@ const ProgressionTracker: FC = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("Stages updated:", stages);
+  }, [stages]);
+
   const getNextStatus = (status: Status): Status => {
     const sequence: Status[] = [
       "pending",
@@ -141,16 +156,27 @@ const ProgressionTracker: FC = () => {
       "completed",
     ];
     const currentIndex = sequence.indexOf(status);
+    console.log("Current status index:", currentIndex);
     return sequence[(currentIndex + 1) % sequence.length];
   };
 
   const toggleStatus = (section: Section, id: string): void => {
+    console.log("Toggling status:", { section, id });
     setStages((prev) => {
-      const newStages = { ...prev };
-      const item = newStages[section].find((item) => item.id === id);
-      if (item) {
-        item.status = getNextStatus(item.status);
-      }
+      // Create a proper deep copy using spread operator
+      const newStages = {
+        ...prev,
+        [section]: prev[section].map((item) => {
+          if (item.id === id) {
+            const nextStatus = getNextStatus(item.status);
+            console.log("Updating status from", item.status, "to", nextStatus);
+            return { ...item, status: nextStatus };
+          }
+          return item;
+        }),
+      };
+
+      console.log("New stages:", newStages);
       return newStages;
     });
   };
@@ -174,9 +200,7 @@ const ProgressionTracker: FC = () => {
             <div className="flex items-center justify-between">
               <span className="font-medium">{item.name}</span>
               <button
-                onClick={() =>
-                  toggleStatus(title.toUpperCase() as Section, item.id)
-                }
+                onClick={() => toggleStatus(getTitleKey(title), item.id)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${getStatusColor(item.status)}`}
               >
                 {formatStatus(item.status)}
